@@ -220,3 +220,161 @@ kubectl config get-contexts
 eksctl delete cluster --name mern-hello-profile --region ap-south-1
 
 ```
+
+## Helm
+
+```
+helm
+
+helm lint .
+
+helm template mernapp .
+
+helm install mernapp . -n mern-helm --create-namespace
+
+kubectl get all -n mern-helm
+
+kubectl get pods -n mern-helm
+
+```
+
+> ![alt text](image-10.png)
+
+
+```
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get nodes
+NAME                                            STATUS   ROLES    AGE   VERSION
+ip-192-168-40-78.ap-south-1.compute.internal    Ready    <none>   57m   v1.34.9-eks-8f14419
+ip-192-168-76-193.ap-south-1.compute.internal   Ready    <none>   57m   v1.34.9-eks-8f14419
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get all -n mern-helm
+NAME                                   READY   STATUS             RESTARTS   AGE
+pod/frontend-6675d6475d-ckssp          0/1     ImagePullBackOff   0          9m11s
+pod/hello-service-85f575fbbc-bjmf7     0/1     ImagePullBackOff   0          9m11s
+pod/hello-service-85f575fbbc-ht4m9     0/1     ImagePullBackOff   0          9m11s
+pod/profile-service-5466c6f744-7hps9   0/1     ImagePullBackOff   0          9m11s
+pod/profile-service-5466c6f744-c8wjl   0/1     ImagePullBackOff   0          9m11s
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/frontend          ClusterIP   10.100.120.37    <none>        80/TCP     9m11s
+service/hello-service     ClusterIP   10.100.178.109   <none>        3001/TCP   9m11s
+service/profile-service   ClusterIP   10.100.44.220    <none>        3002/TCP   9m11s
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/frontend          0/1     1            0           9m11s
+deployment.apps/hello-service     0/2     2            0           9m11s
+deployment.apps/profile-service   0/2     2            0           9m11s
+
+NAME                                         DESIRED   CURRENT   READY   AGE
+replicaset.apps/frontend-6675d6475d          1         1         0       9m11s
+replicaset.apps/hello-service-85f575fbbc     2         2         0       9m11s
+replicaset.apps/profile-service-5466c6f744   2         2         0       9m11s
+
+NAME                                                  REFERENCE                    TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/frontend          Deployment/frontend          cpu: <unknown>/80%   1         5         1          9m11s
+horizontalpodautoscaler.autoscaling/hello-service     Deployment/hello-service     cpu: <unknown>/80%   1         5         2          9m11s
+horizontalpodautoscaler.autoscaling/profile-service   Deployment/profile-service   cpu: <unknown>/80%   1         5         2          9m11s
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
+
+
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get nodes
+NAME                                            STATUS   ROLES    AGE   VERSION
+ip-192-168-40-78.ap-south-1.compute.internal    Ready    <none>   57m   v1.34.9-eks-8f14419
+ip-192-168-76-193.ap-south-1.compute.internal   Ready    <none>   57m   v1.34.9-eks-8f14419
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get all -n mern-helm
+NAME                                   READY   STATUS             RESTARTS   AGE
+pod/frontend-6675d6475d-ckssp          0/1     ImagePullBackOff   0          9m11s
+pod/hello-service-85f575fbbc-bjmf7     0/1     ImagePullBackOff   0          9m11s
+pod/hello-service-85f575fbbc-ht4m9     0/1     ImagePullBackOff   0          9m11s
+pod/profile-service-5466c6f744-7hps9   0/1     ImagePullBackOff   0          9m11s
+pod/profile-service-5466c6f744-c8wjl   0/1     ImagePullBackOff   0          9m11s
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/frontend          ClusterIP   10.100.120.37    <none>        80/TCP     9m11s
+service/hello-service     ClusterIP   10.100.178.109   <none>        3001/TCP   9m11s
+service/profile-service   ClusterIP   10.100.44.220    <none>        3002/TCP   9m11s
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/frontend          0/1     1            0           9m11s
+deployment.apps/hello-service     0/2     2            0           9m11s
+deployment.apps/profile-service   0/2     2            0           9m11s
+
+NAME                                         DESIRED   CURRENT   READY   AGE
+replicaset.apps/frontend-6675d6475d          1         1         0       9m11s
+replicaset.apps/hello-service-85f575fbbc     2         2         0       9m11s
+replicaset.apps/profile-service-5466c6f744   2         2         0       9m11s
+
+NAME                                                  REFERENCE                    TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/frontend          Deployment/frontend          cpu: <unknown>/80%   1         5         1          9m11s
+horizontalpodautoscaler.autoscaling/hello-service     Deployment/hello-service     cpu: <unknown>/80%   1         5         2          9m11s
+horizontalpodautoscaler.autoscaling/profile-service   Deployment/profile-service   cpu: <unknown>/80%   1         5         2          9m11s
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
+
+
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> helm upgrade mernapp . -n mern-helm
+Release "mernapp" has been upgraded. Happy Helming!
+NAME: mernapp
+LAST DEPLOYED: Thu Jul 23 20:33:52 2026
+NAMESPACE: mern-helm
+STATUS: deployed
+REVISION: 2
+NOTES:
+1. Get the application URL by running these commands:
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
+
+
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> helm upgrade mernapp . -n mern-helm
+Release "mernapp" has been upgraded. Happy Helming!
+NAME: mernapp
+LAST DEPLOYED: Thu Jul 23 20:33:52 2026
+NAMESPACE: mern-helm
+STATUS: deployed
+REVISION: 2
+NOTES:
+1. Get the application URL by running these commands:
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
+
+
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> helm rollback mernapp 1 -n mern-helm
+Rollback was a success! Happy Helming!
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get pods -n mern-helm       
+NAME                               READY   STATUS             RESTARTS   AGE
+frontend-6675d6475d-rkdlj          0/1     ImagePullBackOff   0          4m49s
+hello-service-85f575fbbc-bjmf7     0/1     ImagePullBackOff   0          17m
+hello-service-85f575fbbc-ht4m9     0/1     ImagePullBackOff   0          17m
+profile-service-5466c6f744-7hps9   0/1     ImagePullBackOff   0          17m
+profile-service-5466c6f744-c8wjl   0/1     ImagePullBackOff   0          17m
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
+
+
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get all -n mern-helm
+NAME                                   READY   STATUS    RESTARTS   AGE
+pod/frontend-859c86c89-66z4w           1/1     Running   0          54s
+pod/hello-service-f9ff4fb86-5kkvg      1/1     Running   0          54s
+pod/profile-service-79cb5c46f7-9xs4d   1/1     Running   0          54s
+
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/frontend          ClusterIP   10.100.120.37    <none>        80/TCP     19m
+service/hello-service     ClusterIP   10.100.178.109   <none>        3001/TCP   19m
+service/profile-service   ClusterIP   10.100.44.220    <none>        3002/TCP   19m
+
+NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/frontend          1/1     1            1           19m
+deployment.apps/hello-service     1/1     1            1           19m
+deployment.apps/profile-service   1/1     1            1           19m
+
+NAME                                         DESIRED   CURRENT   READY   AGE
+replicaset.apps/frontend-6675d6475d          0         0         0       19m
+replicaset.apps/frontend-859c86c89           1         1         1       54s
+replicaset.apps/hello-service-85f575fbbc     0         0         0       19m
+replicaset.apps/hello-service-f9ff4fb86      1         1         1       54s
+replicaset.apps/profile-service-5466c6f744   0         0         0       19m
+replicaset.apps/profile-service-79cb5c46f7   1         1         1       54s
+
+NAME                                                  REFERENCE                    TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/frontend          Deployment/frontend          cpu: <unknown>/80%   1         5         1          19m
+horizontalpodautoscaler.autoscaling/hello-service     Deployment/hello-service     cpu: <unknown>/80%   1         5         1          19m
+horizontalpodautoscaler.autoscaling/profile-service   Deployment/profile-service   cpu: <unknown>/80%   1         5         1          19m
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
+
+
+```

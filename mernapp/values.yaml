@@ -1,20 +1,24 @@
 helloService:
   name: hello-service
-  image: myrepo/hello-service:latest
-  replicas: 2
+  image: public.ecr.aws/l5r9g0t4/mern/hello:6
+  replicas: 1
   port: 3001
 
 profileService:
   name: profile-service
-  image: myrepo/profile-service:latest
-  replicas: 2
+  image: public.ecr.aws/l5r9g0t4/mern/profile:6
+  replicas: 1
   port: 3002
-  mongoUrl: "specifyYourMongoURLHereWithDatabaseNameInTheEnd"
+  mongoUrl: "mongodb+srv://tm_docker:Ri1OcidhdUoQdmTF@herovired-ppmcad.kncn7uu.mongodb.net/mernapp"
 
 frontend:
   name: frontend
-  image: myrepo/frontend:latest
+  image: public.ecr.aws/l5r9g0t4/mern/frontend:6
   replicas: 1
+  port: 80
+
+service:
+  type: LoadBalancer
   port: 80
 
 serviceAccount:
@@ -27,5 +31,6 @@ hpa:
   targetCPUUtilizationPercentage: 80
 
 ingress:
+  name: my-ingress
   enabled: true
   host: myapp.example.com
