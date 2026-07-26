@@ -16,12 +16,19 @@ spec:
     spec:
       containers:
       - name: {{ .Values.helloService.name }}
-        image: {{ .Values.helloService.image }}
+        image: "{{ .Values.ecrregistry }}/{{ .Values.helloService.image }}:{{ .Values.tag }}"
         ports:
         - containerPort: {{ .Values.helloService.port }}
         env:
         - name: PORT
           value: "{{ .Values.helloService.port }}"
+        resources:
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -41,14 +48,24 @@ spec:
     spec:
       containers:
       - name: {{ .Values.profileService.name }}
-        image: {{ .Values.profileService.image }}
+        image: "{{ .Values.ecrregistry }}/{{ .Values.profileService.image }}:{{ .Values.tag }}"
         ports:
         - containerPort: {{ .Values.profileService.port }}
         env:
         - name: PORT
           value: "{{ .Values.profileService.port }}"
         - name: MONGO_URL
-          value: "{{ .Values.profileService.mongoUrl }}"
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: MONGO_URL
+        resources:
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -68,6 +85,13 @@ spec:
     spec:
       containers:
       - name: {{ .Values.frontend.name }}
-        image: {{ .Values.frontend.image }}
+        image: "{{ .Values.ecrregistry }}/{{ .Values.frontend.image }}:{{ .Values.tag }}"
         ports:
         - containerPort: {{ .Values.frontend.port }}
+        resources:
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}

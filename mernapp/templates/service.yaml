@@ -2,7 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.helloService.name }}
-spec:
+spec: 
+  type: ClusterIP
   selector:
     app: {{ .Values.helloService.name }}
   ports:
@@ -15,6 +16,7 @@ kind: Service
 metadata:
   name: {{ .Values.profileService.name }}
 spec:
+  type: ClusterIP
   selector:
     app: {{ .Values.profileService.name }}
   ports:
@@ -27,6 +29,7 @@ kind: Service
 metadata:
   name: {{ .Values.frontend.name }}
 spec:
+  type: {{ .Values.service.name }}
   selector:
     app: {{ .Values.frontend.name }}
   ports:

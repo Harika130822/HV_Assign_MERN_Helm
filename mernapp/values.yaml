@@ -1,25 +1,35 @@
+registry: public.ecr.aws/l5r9g0t4
+tag: latest
+
 helloService:
   name: hello-service
-  image: public.ecr.aws/l5r9g0t4/mern/hello:6
+  image: mern/hello
   replicas: 1
   port: 3001
 
 profileService:
   name: profile-service
-  image: public.ecr.aws/l5r9g0t4/mern/profile:6
+  image: mern/profile
   replicas: 1
   port: 3002
-  mongoUrl: "mongodb+srv://tm_docker:Ri1OcidhdUoQdmTF@herovired-ppmcad.kncn7uu.mongodb.net/mernapp"
 
 frontend:
   name: frontend
-  image: public.ecr.aws/l5r9g0t4/mern/frontend:6
+  image: mern/frontend
   replicas: 1
   port: 80
 
 service:
   type: LoadBalancer
   port: 80
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
 
 serviceAccount:
   name: my-service-account
