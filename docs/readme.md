@@ -161,7 +161,7 @@ sudo -u jenkins helm version
 
 ## Jenkins Plugin
 
-Plugins (Docker pipeline, Amazon ECR, pipeline: AWS steps, Git, Github Integration / WebHook)
+Plugins (Docker pipeline, Amazon ECR, pipeline: AWS steps, SNS, AWS Credentials, Git, Github Integration / WebHook)
 
 > ![alt text](image-8.png)
 
@@ -201,39 +201,73 @@ aws iam attach-role-policy \
 
 ```
 
+> <img width="1572" height="913" alt="image" src="https://github.com/user-attachments/assets/d940b781-e74e-4adc-b5ab-19ff0a656696" />
 
-## secret from literal
 
-```
-kubectl create secret generic mongo-secret --from-literal=MONGO_URL='specifyYourMongoURLHereWithDatabaseNameInTheEnd'
-kubectl get secret mongo-secret
-kubectl describe secret mongo-secret
-```
 
 ## Monitoring
 
 ```
-ClusterName=streamingapp-cluster
-RegionName=ap-south-1
-FluentBitHttpPort='2020'
-FluentBitReadFromHead='Off'
-FluentBitReadFromTail='On'
-FluentBitHttpServer='On'
+# Define variables
+$ClusterName = "mern-hello-profile"
+$RegionName = "ap-south-1"
+$FluentBitHttpPort = "2020"
+$FluentBitReadFromHead = "Off"
+$FluentBitReadFromTail = "On"
+$FluentBitHttpServer = "On"
 
-curl -s https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/quickstart/cwagent-fluent-bit-quickstart.yaml | \
-sed 's/{{cluster_name}}/'${ClusterName}'/;s/{{region_name}}/'${RegionName}'/;s/{{http_server_toggle}}/"'${FluentBitHttpServer}'"/;s/{{http_server_port}}/"'${FluentBitHttpPort}'"/;s/{{read_from_head}}/"'${FluentBitReadFromHead}'"/;s/{{read_from_tail}}/"'${FluentBitReadFromTail}'"/' | \
-kubectl apply -f -
+# Download YAML
+$yaml = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/quickstart/cwagent-fluent-bit-quickstart.yaml"
+
+# Perform replacements with single quotes around values
+$content = $yaml.Content `
+    -replace "{{cluster_name}}", '"' + $ClusterName + '"' `
+    -replace "{{region_name}}", '"' + $RegionName + '"' `
+    -replace "{{http_server_toggle}}", '"' + $FluentBitHttpServer + '"' `
+    -replace "{{http_server_port}}", '"' + $FluentBitHttpPort + '"' `
+    -replace "{{read_from_head}}", '"' + $FluentBitReadFromHead + '"' `
+    -replace "{{read_from_tail}}", '"' + $FluentBitReadFromTail + '"'
+
+# Save to file
+$content | Out-File -FilePath "cwagent-fluent-bit-quickstart.yaml" -Encoding utf8
+
+# Apply manifest
+kubectl apply -f cwagent-fluent-bit-quickstart.yaml
+
+kubectl delete -f cwagent-fluent-bit-quickstart.yaml
+
 
 kubectl get pods -n amazon-cloudwatch
 
+kubectl logs -n amazon-cloudwatch <cloudwatch-agent-pod>
+
 kubectl delete pods -n amazon-cloudwatch --all
+
+
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm> kubectl get ns
+NAME                STATUS   AGE
+amazon-cloudwatch   Active   14m
+default             Active   35m
+kube-node-lease     Active   35m
+kube-public         Active   35m
+kube-system         Active   35m
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm> kubectl get all -n amazon-cloudwatch
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/cloudwatch-agent-9s4hf   1/1     Running   0          8m38s
+pod/cloudwatch-agent-r8dfs   1/1     Running   0          8m38s
+pod/fluent-bit-bm9zh         1/1     Running   0          8m59s
+pod/fluent-bit-jtdcz         1/1     Running   0          8m58s
+
+NAME                              DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+daemonset.apps/cloudwatch-agent   2         2         2       2            2           kubernetes.io/os=linux   14m
+daemonset.apps/fluent-bit         2         2         2       2            2           kubernetes.io/os=linux   14m
 
 ```
 Verify in AWS Console: CloudWatch → Container Insights, and CloudWatch → Log groups → /aws/containerinsights/streamingapp-cluster/....
 
 If pods are CrashLoopBackOff or no log groups appear, confirm the node role has CloudWatchAgentServerPolicy (Section 9), then:
 
-## Helm
+## Helm Initial Installation
 
 ```
 helm
@@ -248,145 +282,47 @@ kubectl get all -n mern-helm
 
 kubectl get pods -n mern-helm
 
-```
-
-> ![alt text](image-10.png)
-
-
-```
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get nodes
-NAME                                            STATUS   ROLES    AGE   VERSION
-ip-192-168-40-78.ap-south-1.compute.internal    Ready    <none>   57m   v1.34.9-eks-8f14419
-ip-192-168-76-193.ap-south-1.compute.internal   Ready    <none>   57m   v1.34.9-eks-8f14419
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get all -n mern-helm
-NAME                                   READY   STATUS             RESTARTS   AGE
-pod/frontend-6675d6475d-ckssp          0/1     ImagePullBackOff   0          9m11s
-pod/hello-service-85f575fbbc-bjmf7     0/1     ImagePullBackOff   0          9m11s
-pod/hello-service-85f575fbbc-ht4m9     0/1     ImagePullBackOff   0          9m11s
-pod/profile-service-5466c6f744-7hps9   0/1     ImagePullBackOff   0          9m11s
-pod/profile-service-5466c6f744-c8wjl   0/1     ImagePullBackOff   0          9m11s
-
-NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
-service/frontend          ClusterIP   10.100.120.37    <none>        80/TCP     9m11s
-service/hello-service     ClusterIP   10.100.178.109   <none>        3001/TCP   9m11s
-service/profile-service   ClusterIP   10.100.44.220    <none>        3002/TCP   9m11s
-
-NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/frontend          0/1     1            0           9m11s
-deployment.apps/hello-service     0/2     2            0           9m11s
-deployment.apps/profile-service   0/2     2            0           9m11s
-
-NAME                                         DESIRED   CURRENT   READY   AGE
-replicaset.apps/frontend-6675d6475d          1         1         0       9m11s
-replicaset.apps/hello-service-85f575fbbc     2         2         0       9m11s
-replicaset.apps/profile-service-5466c6f744   2         2         0       9m11s
-
-NAME                                                  REFERENCE                    TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
-horizontalpodautoscaler.autoscaling/frontend          Deployment/frontend          cpu: <unknown>/80%   1         5         1          9m11s
-horizontalpodautoscaler.autoscaling/hello-service     Deployment/hello-service     cpu: <unknown>/80%   1         5         2          9m11s
-horizontalpodautoscaler.autoscaling/profile-service   Deployment/profile-service   cpu: <unknown>/80%   1         5         2          9m11s
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
+## secret from literal
+kubectl create secret generic mongo-secret --from-literal=MONGO_URL='specifyYourMongoURLHereWithDatabaseNameInTheEnd' -n mern-helm
+kubectl get secret mongo-secret  -n mern-helm
+kubectl describe secret mongo-secret  -n mern-helm
 
 
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get nodes
-NAME                                            STATUS   ROLES    AGE   VERSION
-ip-192-168-40-78.ap-south-1.compute.internal    Ready    <none>   57m   v1.34.9-eks-8f14419
-ip-192-168-76-193.ap-south-1.compute.internal   Ready    <none>   57m   v1.34.9-eks-8f14419
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get all -n mern-helm
-NAME                                   READY   STATUS             RESTARTS   AGE
-pod/frontend-6675d6475d-ckssp          0/1     ImagePullBackOff   0          9m11s
-pod/hello-service-85f575fbbc-bjmf7     0/1     ImagePullBackOff   0          9m11s
-pod/hello-service-85f575fbbc-ht4m9     0/1     ImagePullBackOff   0          9m11s
-pod/profile-service-5466c6f744-7hps9   0/1     ImagePullBackOff   0          9m11s
-pod/profile-service-5466c6f744-c8wjl   0/1     ImagePullBackOff   0          9m11s
-
-NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
-service/frontend          ClusterIP   10.100.120.37    <none>        80/TCP     9m11s
-service/hello-service     ClusterIP   10.100.178.109   <none>        3001/TCP   9m11s
-service/profile-service   ClusterIP   10.100.44.220    <none>        3002/TCP   9m11s
-
-NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/frontend          0/1     1            0           9m11s
-deployment.apps/hello-service     0/2     2            0           9m11s
-deployment.apps/profile-service   0/2     2            0           9m11s
-
-NAME                                         DESIRED   CURRENT   READY   AGE
-replicaset.apps/frontend-6675d6475d          1         1         0       9m11s
-replicaset.apps/hello-service-85f575fbbc     2         2         0       9m11s
-replicaset.apps/profile-service-5466c6f744   2         2         0       9m11s
-
-NAME                                                  REFERENCE                    TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
-horizontalpodautoscaler.autoscaling/frontend          Deployment/frontend          cpu: <unknown>/80%   1         5         1          9m11s
-horizontalpodautoscaler.autoscaling/hello-service     Deployment/hello-service     cpu: <unknown>/80%   1         5         2          9m11s
-horizontalpodautoscaler.autoscaling/profile-service   Deployment/profile-service   cpu: <unknown>/80%   1         5         2          9m11s
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
-
-
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> helm upgrade mernapp . -n mern-helm
-Release "mernapp" has been upgraded. Happy Helming!
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> helm install mernapp . -n mern-helm --create-namespace
 NAME: mernapp
-LAST DEPLOYED: Thu Jul 23 20:33:52 2026
+LAST DEPLOYED: Sun Jul 26 18:39:02 2026
 NAMESPACE: mern-helm
 STATUS: deployed
-REVISION: 2
+REVISION: 1
 NOTES:
 1. Get the application URL by running these commands:
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
-
-
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> helm upgrade mernapp . -n mern-helm
-Release "mernapp" has been upgraded. Happy Helming!
-NAME: mernapp
-LAST DEPLOYED: Thu Jul 23 20:33:52 2026
-NAMESPACE: mern-helm
-STATUS: deployed
-REVISION: 2
-NOTES:
-1. Get the application URL by running these commands:
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
-
-
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> helm rollback mernapp 1 -n mern-helm
-Rollback was a success! Happy Helming!
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get pods -n mern-helm       
-NAME                               READY   STATUS             RESTARTS   AGE
-frontend-6675d6475d-rkdlj          0/1     ImagePullBackOff   0          4m49s
-hello-service-85f575fbbc-bjmf7     0/1     ImagePullBackOff   0          17m
-hello-service-85f575fbbc-ht4m9     0/1     ImagePullBackOff   0          17m
-profile-service-5466c6f744-7hps9   0/1     ImagePullBackOff   0          17m
-profile-service-5466c6f744-c8wjl   0/1     ImagePullBackOff   0          17m
-PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
-
-
 PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> kubectl get all -n mern-helm
-NAME                                   READY   STATUS    RESTARTS   AGE
-pod/frontend-859c86c89-66z4w           1/1     Running   0          54s
-pod/hello-service-f9ff4fb86-5kkvg      1/1     Running   0          54s
-pod/profile-service-79cb5c46f7-9xs4d   1/1     Running   0          54s
+NAME                                  READY   STATUS    RESTARTS   AGE
+pod/frontend-546d89f645-hdjxw         1/1     Running   0          5m53s
+pod/hello-service-7cc896dcdb-d6lcv    1/1     Running   0          5m53s
+pod/profile-service-65844654c-96jd6   1/1     Running   0          46s
 
-NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
-service/frontend          ClusterIP   10.100.120.37    <none>        80/TCP     19m
-service/hello-service     ClusterIP   10.100.178.109   <none>        3001/TCP   19m
-service/profile-service   ClusterIP   10.100.44.220    <none>        3002/TCP   19m
+NAME                      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/frontend          ClusterIP   10.100.66.176   <none>        80/TCP     5m53s
+service/hello-service     ClusterIP   10.100.250.33   <none>        3001/TCP   5m53s
+service/profile-service   ClusterIP   10.100.36.171   <none>        3002/TCP   5m53s
 
 NAME                              READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/frontend          1/1     1            1           19m
-deployment.apps/hello-service     1/1     1            1           19m
-deployment.apps/profile-service   1/1     1            1           19m
+deployment.apps/frontend          1/1     1            1           5m53s
+deployment.apps/hello-service     1/1     1            1           5m53s
+deployment.apps/profile-service   1/1     1            1           5m53s
 
-NAME                                         DESIRED   CURRENT   READY   AGE
-replicaset.apps/frontend-6675d6475d          0         0         0       19m
-replicaset.apps/frontend-859c86c89           1         1         1       54s
-replicaset.apps/hello-service-85f575fbbc     0         0         0       19m
-replicaset.apps/hello-service-f9ff4fb86      1         1         1       54s
-replicaset.apps/profile-service-5466c6f744   0         0         0       19m
-replicaset.apps/profile-service-79cb5c46f7   1         1         1       54s
+NAME                                        DESIRED   CURRENT   READY   AGE
+replicaset.apps/frontend-546d89f645         1         1         1       5m53s
+replicaset.apps/hello-service-7cc896dcdb    1         1         1       5m53s
+replicaset.apps/profile-service-65844654c   1         1         1       5m53s
 
-NAME                                                  REFERENCE                    TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
-horizontalpodautoscaler.autoscaling/frontend          Deployment/frontend          cpu: <unknown>/80%   1         5         1          19m
-horizontalpodautoscaler.autoscaling/hello-service     Deployment/hello-service     cpu: <unknown>/80%   1         5         1          19m
-horizontalpodautoscaler.autoscaling/profile-service   Deployment/profile-service   cpu: <unknown>/80%   1         5         1          19m
+NAME                                                  REFERENCE                    TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/frontend          Deployment/frontend          cpu: 0%/80%   1         5         1          5m53s
+horizontalpodautoscaler.autoscaling/hello-service     Deployment/hello-service     cpu: 1%/80%   1         5         1          5m53s
+horizontalpodautoscaler.autoscaling/profile-service   Deployment/profile-service   cpu: 8%/80%   1         5         1          5m53s
 PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp> 
-
-
 ```
+> <img width="1634" height="958" alt="image" src="https://github.com/user-attachments/assets/555093e5-dccb-4e34-9fc0-487e0820aba2" />
+
+ImagePullBackOff,InvalidImageName,ErrorImagePull
