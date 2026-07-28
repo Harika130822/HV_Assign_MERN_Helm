@@ -208,7 +208,7 @@ aws iam attach-role-policy \
 ## Monitoring
 
 ```
-# Define variables
+## Define variables
 $ClusterName = "mern-hello-profile"
 $RegionName = "ap-south-1"
 $FluentBitHttpPort = "2020"
@@ -221,12 +221,12 @@ $yaml = Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aws-samples/am
 
 # Perform replacements with single quotes around values
 $content = $yaml.Content `
-    -replace "{{cluster_name}}", '"' + $ClusterName + '"' `
-    -replace "{{region_name}}", '"' + $RegionName + '"' `
-    -replace "{{http_server_toggle}}", '"' + $FluentBitHttpServer + '"' `
-    -replace "{{http_server_port}}", '"' + $FluentBitHttpPort + '"' `
-    -replace "{{read_from_head}}", '"' + $FluentBitReadFromHead + '"' `
-    -replace "{{read_from_tail}}", '"' + $FluentBitReadFromTail + '"'
+    -replace "{{cluster_name}}", "'$ClusterName'" `
+    -replace "{{region_name}}", "'$RegionName'" `
+    -replace "{{http_server_toggle}}", "'$FluentBitHttpServer'" `
+    -replace "{{http_server_port}}", "'$FluentBitHttpPort'" `
+    -replace "{{read_from_head}}", "'$FluentBitReadFromHead'" `
+    -replace "{{read_from_tail}}", "'$FluentBitReadFromTail'"
 
 # Save to file
 $content | Out-File -FilePath "cwagent-fluent-bit-quickstart.yaml" -Encoding utf8
@@ -325,4 +325,24 @@ PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp>
 ```
 > <img width="1634" height="958" alt="image" src="https://github.com/user-attachments/assets/555093e5-dccb-4e34-9fc0-487e0820aba2" />
 
-ImagePullBackOff,InvalidImageName,ErrorImagePull
+> <img width="1325" height="290" alt="image" src="https://github.com/user-attachments/assets/3ab25138-79c3-47a2-b78d-1637e7abf9f8" />
+
+
+## Role Rolebinding
+
+```
+PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm> kubectl get serviceaccounts,roles,rolebindings -n mern-helm
+NAME                        SECRETS   AGE
+serviceaccount/default      0         35m
+serviceaccount/jenkins-sa   0         7m9s
+
+NAME                                           CREATED AT
+role.rbac.authorization.k8s.io/helm-deployer   2026-07-28T12:32:48Z
+
+NAME                                                          ROLE                 AGE
+rolebinding.rbac.authorization.k8s.io/helm-deployer-binding   Role/helm-deployer   102s
+```
+
+## troubleshooting Tips
+ImagePullBackOff,InvalidImageName,ErrorImagePull, CreateContainerConfigError
+secrets are namespace scope 
