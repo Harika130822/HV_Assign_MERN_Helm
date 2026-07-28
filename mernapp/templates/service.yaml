@@ -29,7 +29,7 @@ kind: Service
 metadata:
   name: {{ .Values.frontend.name }}
 spec:
-  type: {{ .Values.service.name }}
+  type: {{ .Values.service.type }}
   selector:
     app: {{ .Values.frontend.name }}
   ports:
