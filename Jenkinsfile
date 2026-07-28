@@ -9,7 +9,7 @@ pipeline {
     IMAGE_TAG       = "${BUILD_NUMBER}"
     EKS_CLUSTER_NAME= "mern-hello-profile"
     MONGO_URL       = credentials('MONGO_URL')
-    AWSSNS_TOPIC_ARN = "arn:aws:sns:${AWS_REGION}:${AWS_ACCOUNT_ID}:mernapp-deployment-notifications"
+    AWSSNS_TOPIC_ARN = "arn:aws:sns:${AWS_REGION}:${AWS_ACCOUNT_ID}:jenkins-pipeline-alerts"
   }
 
   stages {
@@ -77,7 +77,7 @@ pipeline {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding',
                           credentialsId: 'aws_credentials']]) {
             sh """
-              helm upgrade --install mernapp ./mernapp --set registry=${ECR_REGISTRY} --set tag=${IMAGE_TAG} -n mern-helm --wait --atomic
+              helm upgrade --install mernapp ./mernapp --set registry=${ECR_REGISTRY} --set tag=${IMAGE_TAG} -n mern-helm 
             """
             }
           }
