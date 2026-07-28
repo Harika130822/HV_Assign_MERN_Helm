@@ -329,6 +329,8 @@ PS C:\Users\abhis\Harika\Assignments\HV_Assign_MERN_Helm\mernapp>
 
 > <img width="636" height="295" alt="image" src="https://github.com/user-attachments/assets/99885aea-d0f0-4978-912a-9925629327df" />
 
+> <img width="806" height="355" alt="image" src="https://github.com/user-attachments/assets/e63e2945-9f56-461e-838f-b4b2da62c774" />
+
 ## Role Rolebinding
 
 ```
