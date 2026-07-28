@@ -1,5 +1,5 @@
 registry: public.ecr.aws/l5r9g0t4
-tag: 5
+tag: latest
 
 helloService:
   name: hello-service
